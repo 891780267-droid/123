@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>董晴蕾 - 个人作品集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", 微软雅黑, sans-serif;
+        }
+        body {
+            background: url("images/bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            color: #333;
+            padding-bottom: 50px;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: -1;
+        }
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+        .header h1 {
+            font-size: 36px;
+            color: #222;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .header .link-btn {
+            display: inline-block;
+            padding: 10px 30px;
+            background: #2f54eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .header .link-btn:hover {
+            background: #1d39c4;
+            transform: translateY(-3px);
+        }
+        .nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+        .nav a {
+            padding: 8px 20px;
+            background: #f5f5f5;
+            color: #333;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+        }
+        .nav a:hover, .nav a.active {
+            background: #2f54eb;
+            color: #fff;
+            border-color: #2f54eb;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .section {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s;
+        }
+        .section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section h2 {
+            font-size: 28px;
+            color: #222;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2f54eb;
+            display: inline-block;
+        }
+        .work-list {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        .work-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .work-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+        .work-img {
+            width: 100%;
+            height: auto;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative; /* 新增：为轮播按钮定位 */
+        }
+        .work-img img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            transition: all 0.5s;
+            cursor: pointer;
+        }
+        /* 新增：轮播控制按钮 */
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .work-img:hover .carousel-control {
+            opacity: 1;
+        }
+        .prev-control {
+            left: 15px;
+        }
+        .next-control {
+            right: 15px;
+        }
+        /* 缩略图列表样式 */
+        .thumbnail-list {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f8f8;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+        .thumbnail-list img {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .thumbnail-list img.active {
+            border-color: #2f54eb;
+        }
+        /* 大图预览弹窗 */
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+        }
+        .preview-modal.show {
+            display: flex;
+        }
+        .preview-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .work-info {
+            padding: 25px;
+        }
+        .work-info h3 {
+            font-size: 20px;
+            color: #222;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .work-info p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+        }
+        .intern-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            line-height: 1.8;
+            font-size: 16px;
+            color: #333;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+        .intern-card .intern-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: #f8f8f8;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .intern-card .intern-img img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        .intern-card p {
+            margin-bottom: 10px;
+        }
+        .intern-card b {
+            color: #2f54eb;
+            font-weight: 600;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            max-width: 800px;
+            margin: 40px auto 0;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+            .section h2 {
+                font-size: 24px;
+            }
+            .nav {
+                gap: 10px;
+            }
+            .nav a {
+                padding: 6px 15px;
+                font-size: 14px;
+            }
+            .work-info {
+                padding: 20px;
+            }
+            .work-info h3 {
+                font-size: 18px;
+            }
+            .work-info p {
+                font-size: 14px;
+            }
+            .thumbnail-list img {
+                width: 80px;
+                height: 60px;
+            }
+            .carousel-control {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>董晴蕾 个人作品集</h1>
+        <p>剧本创作 | 剪辑制作 | 平面设计 | 影视实践</p>
+        <a href="https://pan.baidu.com/s/1i5U2gwB_-ssQwba-AwDDFQ?pwd=qakk" target="_blank" class="link-btn">查看完整作品</a>
+    </div>
+
+    <div class="nav">
+        <a href="#script" class="active">剧本创作</a>
+        <a href="#edit">剪辑作品</a>
+        <a href="#graphic">平面作品</a>
+        <a href="#intern">实习经历</a>
+    </div>
+
+    <div class="container">
+        <div class="section" id="script">
+            <h2>剧本创作</h2>
+            <div class="work-list">
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/work1.jpg" alt="反诈剧本《羊群》" class="main-img">
+                        <!-- 单图无轮播按钮 -->
+                    </div>
+                    <div class="work-info">
+                        <h3>反诈剧本《羊群》</h3>
+                        <p><b>创作背景</b>：石狮公安实习期间创作，被采用翻拍成宣传视频，发布于石狮公安视频号、公安部刑侦局抖音。<br><b>核心内容</b>：以“点赞分红”诈骗为原型，讲述前台小美被诈骗分子诱导充值的全过程，还原电信诈骗真实套路。</p>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/work2.jpg" alt="冬至习俗拟人化介绍" class="main-img">
+                    </div>
+                    <div class="work-info">
+                        <h3>冬至习俗拟人化介绍</h3>
+                        <p><b>担任角色</b>：编导/剪辑/拍摄<br><b>参赛方向</b>：二十四节气作品设计大赛<br><b>核心内容</b>：将冬至拟人化，对比南北方冬至“吃饺子/吃汤圆”的习俗差异，融合传统文化与趣味表达。</p>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/work3.jpg" alt="微电影《光/当光照之时》" class="main-img">
+                    </div>
+                    <div class="work-info">
+                        <h3>校园青春微电影《光/当光照之时》</h3>
+                        <p><b>担任角色</b>：编剧/副导/部分剪辑<br><b>核心内容</b>：以高三校园为背景，讲述单亲家庭林允雯因母亲病重陷入困境，与问题学生叶虹相遇后的成长故事，聚焦青春、困境与温暖。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="edit">
+            <h2>剪辑作品</h2>
+            <div class="work-list">
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/work4.jpg" alt="产品拍摄作业" class="main-img">
+                    </div>
+                    <div class="work-info">
+                        <h3>产品拍摄作业</h3>
+                        <p>美妆产品短视频，聚焦产品展示与视觉美感，打造简约高级的产品镜头语言。</p>
+                    </div>
+                </div>
+                <!-- 微电影系列：缩略图+自动轮播 -->
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/microfilm1.jpg" alt="微电影剪辑系列1" class="main-img" data-group="microfilm">
+                        <!-- 新增轮播按钮 -->
+                        <button class="carousel-control prev-control" data-group="microfilm">&lt;</button>
+                        <button class="carousel-control next-control" data-group="microfilm">&gt;</button>
+                    </div>
+                    <div class="thumbnail-list">
+                        <img src="images/microfilm1.jpg" alt="微电影1" class="thumbnail" data-group="microfilm" data-src="images/microfilm1.jpg" class="active">
+                        <img src="images/microfilm2.jpg" alt="微电影2" class="thumbnail" data-group="microfilm" data-src="images/microfilm2.jpg">
+                        <img src="images/microfilm3.jpg" alt="微电影3" class="thumbnail" data-group="microfilm" data-src="images/microfilm3.jpg">
+                    </div>
+                    <div class="work-info">
+                        <h3>微电影剪辑系列</h3>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/edit1.jpg" alt="影视二创混剪" class="main-img">
+                    </div>
+                    <div class="work-info">
+                        <h3>影视二创混剪</h3>
+                    </div>
+                </div>
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/edit2.jpg" alt="AE动画制作" class="main-img">
+                    </div>
+                    <div class="work-info">
+                        <h3>AE动画制作</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="graphic">
+            <h2>平面作品</h2>
+            <div class="work-list">
+                <!-- POPMART海报：缩略图+自动轮播 -->
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/pop1.jpg" alt="POPMART海报设计1" class="main-img" data-group="popmart">
+                        <button class="carousel-control prev-control" data-group="popmart">&lt;</button>
+                        <button class="carousel-control next-control" data-group="popmart">&gt;</button>
+                    </div>
+                    <div class="thumbnail-list">
+                        <img src="images/pop1.jpg" alt="POPMART1" class="thumbnail" data-group="popmart" data-src="images/pop1.jpg" class="active">
+                        <img src="images/pop2.jpg" alt="POPMART2" class="thumbnail" data-group="popmart" data-src="images/pop2.jpg">
+                        <img src="images/pop3.jpg" alt="POPMART3" class="thumbnail" data-group="popmart" data-src="images/pop3.jpg">
+                        <img src="images/pop4.jpg" alt="POPMART4" class="thumbnail" data-group="popmart" data-src="images/pop4.jpg">
+                    </div>
+                    <div class="work-info">
+                        <h3>POPMART 海报设计</h3>
+                    </div>
+                </div>
+                <!-- 海报设计：缩略图+自动轮播 -->
+                <div class="work-card">
+                    <div class="work-img">
+                        <img src="images/poster1.jpg" alt="海报设计1" class="main-img" data-group="poster">
+                        <button class="carousel-control prev-control" data-group="poster">&lt;</button>
+                        <button class="carousel-control next-control" data-group="poster">&gt;</button>
+                    </div>
+                    <div class="thumbnail-list">
+                        <img src="images/poster1.jpg" alt="海报1" class="thumbnail" data-group="poster" data-src="images/poster1.jpg" class="active">
+                        <img src="images/poster2.jpg" alt="海报2" class="thumbnail" data-group="poster" data-src="images/poster2.jpg">
+                        <img src="images/poster3.jpg" alt="海报3" class="thumbnail" data-group="poster" data-src="images/poster3.jpg">
+                        <img src="images/poster4.jpg" alt="海报4" class="thumbnail" data-group="poster" data-src="images/poster4.jpg">
+                    </div>
+                    <div class="work-info">
+                        <h3>海报设计</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="intern">
+            <h2>实习经历</h2>
+            <div class="intern-card">
+                <div class="intern-img">
+                    <img src="images/intern1.jpg" alt="石狮公安新闻中心实习" class="main-img">
+                </div>
+                <div>
+                    <p><b>实习单位</b>：石狮公安新闻中心</p>
+                    <p><b>核心工作内容</b>：</p>
+                    <p>1. 反诈宣传板块：撰写反诈口播稿，参与反诈口播视频拍摄与制作；创作反诈骗宣传剧本《羊群》并被官方采用翻拍成宣传视频。</p>
+                    <p>2. 节日/主题宣传视频：参与“大暑”致敬高温坚守者、“八一”建军节致敬系列视频的拍摄与创意构思；参与叛逆飙车少年采访，并为相关视频制作提供创意意见。</p>
+                </div>
+            </div>
+            <div class="intern-card" style="margin-top: 40px;">
+                <div class="intern-img">
+                    <img src="images/intern2.jpg" alt="芳疗账号剪辑实践" class="main-img">
+                </div>
+                <div>
+                    <p><b>实践内容</b>：为芳疗账号剪辑口播视频，打造信息流账号内容，掌握短视频口播剪辑的节奏与信息流内容创作逻辑。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 大图预览弹窗 -->
+    <div class="preview-modal">
+        <button class="close-btn">&times;</button>
+        <img src="" alt="大图预览" class="preview-img">
+    </div>
+
+    <div class="footer">
+        <p>董晴蕾 个人作品集 © All Rights Reserved</p>
+        <p>作品查看链接：https://pan.baidu.com/s/1i5U2gwB_-ssQwba-AwDDFQ?pwd=qakk</p>
+    </div>
+
+    <script>
+        // 导航栏点击高亮
+        const navLinks = document.querySelectorAll('.nav a');
+        const sections = document.querySelectorAll('.section');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                navLinks.forEach(item => item.classList.remove('active'));
+                link.classList.add('active');
+                const targetId = link.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 滚动时板块渐入动画
+        window.addEventListener('scroll', () => {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (sectionTop < windowHeight * 0.8) {
+                    section.classList.add('show');
+                }
+            });
+        });
+        window.dispatchEvent(new Event('scroll'));
+
+        // 核心：轮播逻辑（含自动轮播）
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImgs = document.querySelectorAll('.main-img');
+        const previewModal = document.querySelector('.preview-modal');
+        const previewImg = document.querySelector('.preview-img');
+        const closeBtn = document.querySelector('.close-btn');
+        const prevControls = document.querySelectorAll('.prev-control');
+        const nextControls = document.querySelectorAll('.next-control');
+
+        // 存储每个图片组的轮播状态
+        const carouselStates = {
+            microfilm: { index: 0, timer: null },
+            popmart: { index: 0, timer: null },
+            poster: { index: 0, timer: null }
+        };
+
+        // 初始化自动轮播
+        function initAutoCarousel(group) {
+            // 先清除原有定时器
+            if (carouselStates[group].timer) {
+                clearInterval(carouselStates[group].timer);
+            }
+            // 设置5秒自动轮播
+            carouselStates[group].timer = setInterval(() => {
+                changeSlide(group, 1);
+            }, 5000);
+        }
+
+        // 切换轮播图（direction: 1=下一张, -1=上一张）
+        function changeSlide(group, direction) {
+            const thumbs = document.querySelectorAll(`.thumbnail[data-group="${group}"]`);
+            const mainImg = document.querySelector(`.main-img[data-group="${group}"]`);
+            
+            // 更新索引
+            carouselStates[group].index = (carouselStates[group].index + direction + thumbs.length) % thumbs.length;
+            const newIndex = carouselStates[group].index;
+
+            // 更新主图和缩略图高亮
+            thumbs.forEach((thumb, idx) => {
+                thumb.classList.toggle('active', idx === newIndex);
+            });
+            mainImg.src = thumbs[newIndex].getAttribute('data-src');
+            mainImg.alt = thumbs[newIndex].alt;
+        }
+
+        // 缩略图点击事件
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                const group = thumb.getAttribute('data-group');
+                const thumbs = document.querySelectorAll(`.thumbnail[data-group="${group}"]`);
+                
+                // 找到点击的缩略图索引
+                const newIndex = Array.from(thumbs).findIndex(t => t === thumb);
+                carouselStates[group].index = newIndex;
+
+                // 更新主图和缩略图高亮
+                thumbs.forEach((t, idx) => {
+                    t.classList.toggle('active', idx === newIndex);
+                });
+                const mainImg = document.querySelector(`.main-img[data-group="${group}"]`);
+                mainImg.src = thumb.getAttribute('data-src');
+                mainImg.alt = thumb.alt;
+
+                // 重置自动轮播定时器
+                initAutoCarousel(group);
+            });
+        });
+
+        // 上一张/下一张按钮点击事件
+        prevControls.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.getAttribute('data-group');
+                changeSlide(group, -1);
+                initAutoCarousel(group); // 重置定时器
+            });
+        });
+
+        nextControls.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.getAttribute('data-group');
+                changeSlide(group, 1);
+                initAutoCarousel(group); // 重置定时器
+            });
+        });
+
+        // 点击主图/缩略图放大预览
+        [...mainImgs, ...thumbnails].forEach(img => {
+            img.addEventListener('click', () => {
+                const src = img.getAttribute('data-src') || img.src;
+                previewImg.src = src;
+                previewImg.alt = img.alt;
+                previewModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+
+                // 暂停所有自动轮播
+                Object.keys(carouselStates).forEach(group => {
+                    if (carouselStates[group].timer) {
+                        clearInterval(carouselStates[group].timer);
+                    }
+                });
+            });
+        });
+
+        // 关闭预览弹窗
+        closeBtn.addEventListener('click', () => {
+            previewModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+
+            // 恢复自动轮播
+            Object.keys(carouselStates).forEach(group => {
+                initAutoCarousel(group);
+            });
+        });
+
+        // 点击弹窗空白处关闭
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) {
+                previewModal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+                // 恢复自动轮播
+                Object.keys(carouselStates).forEach(group => {
+                    initAutoCarousel(group);
+                });
+            }
+        });
+
+        // 页面加载完成后初始化所有轮播组
+        window.addEventListener('load', () => {
+            Object.keys(carouselStates).forEach(group => {
+                initAutoCarousel(group);
+            });
+        });
+
+        // 页面离开时清除定时器（优化性能）
+        window.addEventListener('beforeunload', () => {
+            Object.keys(carouselStates).forEach(group => {
+                if (carouselStates[group].timer) {
+                    clearInterval(carouselStates[group].timer);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
